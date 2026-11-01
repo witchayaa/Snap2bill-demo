@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../repositories/local_bill_repository.dart';
 import '../routes/app_routes.dart';
 import '../services/camera_service.dart';
+import '../services/supabase_auth_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/formatters.dart';
 import '../widgets/bill_card.dart';
@@ -108,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchMyBills() async {
     try {
-      final userId = _supabase.auth.currentUser?.id;
+      final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
       if (userId == null) {
         return await _localRepo.getCachedBills();
       }

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../services/supabase_auth_service.dart';
 import '../../../models/bill_model.dart';
 import '../../../models/user_model.dart';
 import '../../../providers/bill_provider.dart';
@@ -55,9 +56,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
     });
 
     _currentUserId =
+        SupabaseAuthService().currentUserId ??
         _supabase.auth.currentUser?.id ??
         'guest_${DateTime.now().millisecondsSinceEpoch}';
-    final email = _supabase.auth.currentUser?.email;
+    final email = SupabaseAuthService().currentUserEmail ?? _supabase.auth.currentUser?.email;
     _currentUserName = email != null
         ? email.split('@')[0]
         : 'Guest (${_currentUserId.substring(_currentUserId.length - 4)})';
@@ -95,7 +97,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ) ??
             0.0;
         await _supabase.from('lobbies').insert({
-          'host_id': _supabase.auth.currentUser?.id,
+          'host_id': _currentUserId,
           'room_code': _roomId,
           'shop_name': widget.receiptData?['shop_name'] ?? 'ไม่ระบุชื่อร้าน',
           'total_amount': rawTotalAmount,

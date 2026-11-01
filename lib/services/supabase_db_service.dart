@@ -1,11 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/user_model.dart';
 import '../models/bill_model.dart';
+import 'supabase_auth_service.dart';
 
 class SupabaseDbService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  String? get currentUserId => _supabase.auth.currentUser?.id;
+  String? get currentUserId =>
+      SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
 
   Future<List<RoomMember>> getRoomGuestMembers(String roomCode) async {
     final lobby = await _supabase
@@ -28,7 +30,7 @@ class SupabaseDbService {
     String roomCode,
     RoomMember member,
   ) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) throw StateError('ผู้ใช้ยังไม่ได้ล็อกอิน');
 
     final lobby = await _supabase
@@ -69,7 +71,7 @@ class SupabaseDbService {
 
   // 1. ดึงข้อมูลโปรไฟล์ของตัวเอง
   Future<UserModel?> getMyProfile() async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) return null;
 
     final response = await _supabase
@@ -86,7 +88,7 @@ class SupabaseDbService {
     required String displayName,
     required Map<String, dynamic>? paymentInfo,
   }) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) throw 'ผู้ใช้ยังไม่ได้ล็อกอิน';
 
     final promptPayType = paymentInfo?['type'];
@@ -216,7 +218,7 @@ class SupabaseDbService {
 
   // 2. ดึงสมุดรายชื่อเพื่อน (ดึงเฉพาะคนที่ยังไม่ถูกซ่อน/ลบ)
   Future<List<FriendModel>> getMyFriends() async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) return [];
 
     final response = await _supabase
@@ -231,7 +233,7 @@ class SupabaseDbService {
 
   // 3. เพิ่มเพื่อนใหม่เข้าสมุดรายชื่อ
   Future<void> addFriend(String friendName) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) throw 'ผู้ใช้ยังไม่ได้ล็อกอิน';
 
     await _supabase.from('friends').insert({
@@ -242,7 +244,7 @@ class SupabaseDbService {
 
   // 4. ดึงประวัติบิลของตัวเอง (เรียงจากล่าสุดไปเก่าสุด)
   Future<List<BillModel>> getMyBills() async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) return [];
 
     final response = await _supabase
@@ -257,7 +259,7 @@ class SupabaseDbService {
 
   // 5. สร้างบิลใหม่เริ่มต้น (สถานะ draft)
   Future<BillModel> createBill(String shopName, double totalAmount) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = currentUserId;
     if (userId == null) throw 'ผู้ใช้ยังไม่ได้ล็อกอิน';
 
     final response = await _supabase

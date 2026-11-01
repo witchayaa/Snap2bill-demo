@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../services/supabase_auth_service.dart';
 import '../../../models/bill_model.dart';
 import '../../../providers/bill_provider.dart';
 import '../../../routes/app_routes.dart';
@@ -50,9 +51,10 @@ class _ClaimScreenState extends State<ClaimScreen> {
   void initState() {
     super.initState();
     _currentUserId =
+        SupabaseAuthService().currentUserId ??
         _supabase.auth.currentUser?.id ??
         'guest_${DateTime.now().millisecondsSinceEpoch}';
-    final email = _supabase.auth.currentUser?.email;
+    final email = SupabaseAuthService().currentUserEmail ?? _supabase.auth.currentUser?.email;
     if (email != null) {
       _currentUserName = email.split('@')[0];
     } else {

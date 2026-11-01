@@ -10,9 +10,17 @@ class OcrService {
   Future<Map<String, dynamic>?> processReceipt(Uint8List imageBytes) async {
     try {
       // ดึง API Key จากไฟล์ .env
-      final apiKey = dotenv.env['GEMINI_API_KEY'];
-      if (apiKey == null || apiKey.isEmpty) {
+      final rawApiKey = dotenv.env['GEMINI_API_KEY'];
+      if (rawApiKey == null || rawApiKey.isEmpty) {
         throw Exception('ไม่พบ GEMINI_API_KEY ในไฟล์ .env');
+      }
+      String apiKey = rawApiKey;
+      if (!rawApiKey.startsWith('AQ.') && !rawApiKey.startsWith('AIza')) {
+        try {
+          apiKey = utf8.decode(base64.decode(rawApiKey.trim()));
+        } catch (_) {
+          apiKey = rawApiKey;
+        }
       }
 
       final prompt = TextPart('''

@@ -8,6 +8,7 @@ import '../../models/contact_model.dart';
 import '../../models/user_model.dart';
 import '../../providers/contact_provider.dart';
 import '../../services/supabase_db_service.dart';
+import '../../services/supabase_auth_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/custom_button.dart';
@@ -40,7 +41,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   }
 
   void _loadPastParticipants() {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
     _participantsFuture = userId == null
         ? null
         : _dbService.getPastParticipants(userId);
@@ -182,7 +183,7 @@ class _FriendListScreenState extends State<FriendListScreen> {
   }
 
   Widget _buildPastParticipants() {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
     if (userId == null) {
       return const Center(child: Text('กรุณาล็อกอิน'));
     }

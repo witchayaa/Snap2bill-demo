@@ -11,6 +11,7 @@ import '../../../providers/bill_provider.dart';
 import '../../../providers/user_provider.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/supabase_storage_service.dart';
+import '../../../services/supabase_auth_service.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/formatters.dart';
 import '../../../widgets/bill/promptpay_card.dart';
@@ -80,7 +81,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    _currentUserId = SupabaseAuthService().currentUserId ?? Supabase.instance.client.auth.currentUser?.id;
     _selectedUserId = _currentUserId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _fetchHostPromptPayInfo();
@@ -92,7 +93,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
       final supabase = Supabase.instance.client;
       final userProvider = context.read<UserProvider>();
       final currentProfile = await userProvider.fetchCurrentUserProfile();
-      final currentUserId = supabase.auth.currentUser?.id;
+      final currentUserId = SupabaseAuthService().currentUserId ?? supabase.auth.currentUser?.id;
       String? hostId;
 
       if (widget.lobbyId.isNotEmpty) {
@@ -317,7 +318,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     try {
       final supabase = Supabase.instance.client;
-      final userId = supabase.auth.currentUser?.id;
+      final userId = SupabaseAuthService().currentUserId ?? supabase.auth.currentUser?.id;
       if (userId == null) throw 'ไม่พบรหัสผู้ใช้งาน กรุณาล็อกอินใหม่';
       final userTotalsForDB = _calculateUserShares();
       final calculatedTotal = userTotalsForDB.values.fold<double>(

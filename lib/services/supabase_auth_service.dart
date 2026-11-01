@@ -1,19 +1,53 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // เพิ่ม import สำหรับ dotenv
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseAuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
-
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+
+  static const String defaultDemoUserId = '9ee9538c-2771-4e54-aca7-ed66e653ab2e';
+  static const String defaultDemoEmail = 'wny230748@gmail.com';
+  static bool _isDemoSession = false;
+
+  static bool get isDemoSession => _isDemoSession;
+
+  static Future<void> loadSavedSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isDemoSession = prefs.getBool('is_demo_session') ?? false;
+    } catch (_) {}
+  }
+
+  static Future<void> enableDemoSession() async {
+    _isDemoSession = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_demo_session', true);
+    } catch (_) {}
+  }
+
+  static Future<void> clearDemoSession() async {
+    _isDemoSession = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('is_demo_session');
+    } catch (_) {}
+  }
+
+  String? get currentUserId =>
+      _supabase.auth.currentUser?.id ?? (_isDemoSession ? defaultDemoUserId : null);
+
+  String? get currentUserEmail =>
+      _supabase.auth.currentUser?.email ?? (_isDemoSession ? defaultDemoEmail : null);
 
   bool _isInitialized = false;
 
   Future<void> _ensureInitialized() async {
     if (!_isInitialized) {
       await _googleSignIn.initialize(
-        // เปลี่ยนมาดึงค่าจากไฟล์ .env แทนการฝัง String ตรงๆ
         clientId: dotenv.env['GOOGLE_CLIENT_ID'],
         serverClientId: dotenv.env['GOOGLE_SERVER_CLIENT_ID'],
       );
@@ -32,10 +66,7 @@ class SupabaseAuthService {
       }
 
       await _ensureInitialized();
-
-      // ไม่ต้องเช็ก null แล้ว เพราะถ้าไม่ได้ user มันจะกระโดดไปเข้า catch (e) ด้านล่างแทน
       final googleUser = await _googleSignIn.authenticate();
-
       final googleAuth = googleUser.authentication;
       final idToken = googleAuth.idToken;
 
@@ -43,18 +74,18 @@ class SupabaseAuthService {
         throw 'ไม่สามารถดึงข้อมูล Token จาก Google ได้';
       }
 
-      // ส่งแค่ idToken ตัวเดียวให้ Supabase ก็ล็อกอินผ่านแล้วครับ
       return await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
       );
     } catch (e) {
       debugPrint('เกิดข้อผิดพลาดในการล็อกอิน: $e');
-      rethrow; // โยน error กลับไปให้หน้า UI จัดการ (เช่น โชว์ป๊อปอัปแจ้งเตือน)
+      rethrow;
     }
   }
 
   Future<void> signOut() async {
+    await clearDemoSession();
     if (!kIsWeb) {
       await _googleSignIn.signOut();
     }

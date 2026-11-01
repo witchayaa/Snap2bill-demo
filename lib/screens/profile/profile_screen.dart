@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/user_model.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../services/supabase_auth_service.dart';
 import '../../routes/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/constants.dart';
@@ -165,6 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, userProvider, _) {
         _syncProfile(userProvider);
         final email =
+            SupabaseAuthService().currentUserEmail ??
             Supabase.instance.client.auth.currentUser?.email ??
             'ไม่พบข้อมูลอีเมล';
 

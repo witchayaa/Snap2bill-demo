@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/supabase_auth_service.dart';
 
 import '../models/contact_model.dart';
 
@@ -15,7 +16,7 @@ class ContactProvider extends ChangeNotifier {
   String? get error => _error;
 
   Future<void> loadContacts() async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
     if (userId == null) {
       _contacts = [];
       _error = 'กรุณาล็อกอินเพื่อดูรายชื่อเพื่อนที่บันทึกไว้';
@@ -44,7 +45,7 @@ class ContactProvider extends ChangeNotifier {
   }
 
   Future<void> saveContactIfNotExists(String name) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
     if (userId == null) throw StateError('กรุณาล็อกอินก่อนบันทึกรายชื่อเพื่อน');
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
@@ -75,7 +76,7 @@ class ContactProvider extends ChangeNotifier {
   }
 
   Future<void> deleteContact(String id) async {
-    final userId = _supabase.auth.currentUser?.id;
+    final userId = SupabaseAuthService().currentUserId ?? _supabase.auth.currentUser?.id;
     if (userId == null) throw StateError('กรุณาล็อกอินก่อนลบรายชื่อเพื่อน');
     final deletedRows = await _supabase
         .from('saved_contacts')
