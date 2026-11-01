@@ -49,4 +49,4 @@ app.*.map.json
 .env*
 
 # Excluded Folders
-Labsheet/
+Labsheet/!public/assets/.env
