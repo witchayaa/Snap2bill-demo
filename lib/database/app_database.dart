@@ -21,6 +21,10 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  Future<int> clearAllCachedBills() {
+    return delete(cachedBills).go();
+  }
+
   Future<List<CachedBill>> getAllCachedBills() {
     return (select(cachedBills)
           ..orderBy([

@@ -13,6 +13,12 @@ class LocalBillRepository {
 
   // Cache multiple bills from Supabase
   Future<void> cacheSupabaseBills(List<Map<String, dynamic>> rawBills) async {
+    try {
+      await _db.clearAllCachedBills();
+    } catch (_) {}
+
+    if (rawBills.isEmpty) return;
+
     final companions = <CachedBillsCompanion>[];
     for (final b in rawBills) {
       final id = b['id']?.toString() ?? '';

@@ -8,8 +8,8 @@ class SupabaseAuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
-  static const String defaultDemoUserId = '9ee9538c-2771-4e54-aca7-ed66e653ab2e';
-  static const String defaultDemoEmail = 'wny230748@gmail.com';
+  static const String defaultDemoUserId = '5a0568e9-7c1a-4b62-a354-edf27a358963';
+  static const String defaultDemoEmail = 'snap2bill.demo.tester@gmail.com';
   static bool _isDemoSession = false;
 
   static bool get isDemoSession => _isDemoSession;

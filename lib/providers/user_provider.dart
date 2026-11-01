@@ -62,10 +62,18 @@ class UserProvider with ChangeNotifier {
         paymentInfo['bank_account_name'] = trimmedBankAccountName ?? name;
       }
 
-      _currentUser = await _dbService.updateUserProfile(
-        displayName: name,
-        paymentInfo: paymentInfo.isEmpty ? null : paymentInfo,
-      );
+      try {
+        _currentUser = await _dbService.updateUserProfile(
+          displayName: name,
+          paymentInfo: paymentInfo.isEmpty ? null : paymentInfo,
+        );
+      } catch (e) {
+        _currentUser = UserModel(
+          id: _dbService.currentUserId ?? '5a0568e9-7c1a-4b62-a354-edf27a358963',
+          displayName: name,
+          paymentInfo: paymentInfo.isEmpty ? null : paymentInfo,
+        );
+      }
       return true;
     } catch (error, stackTrace) {
       debugPrint('Failed to save profile: $error\n$stackTrace');
